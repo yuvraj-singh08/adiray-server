@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 require("dotenv").config({ path: ".env" });
 
 const userRouter = require("./routes/userRoutes");
+const postRouter = require("./routes/postRoutes");
 const AppError = require("./utils/error");
 const errorHandler = require("./middleware/errorHandler");
 const cors = require('cors');
@@ -28,6 +29,7 @@ app.use((req, res, next) => {
 
 
 app.use("/api/users", userRouter);
+app.use("/api/posts",postRouter)
 app.use(cors())
 
 app.all("*", (req, res, next) => {
