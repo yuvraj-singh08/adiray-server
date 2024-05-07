@@ -14,7 +14,13 @@ exports.createPost = async (req, res) => {
 // Get a post by ID
 exports.getPostById = async (req, res) => {
     try {
-        const post = await Post.findById(req.params.id);
+        let post;
+        if (req.params.id != null) {
+            post = await Post.findById(req.params.id);
+        }
+        else {
+            post = await Post.find();
+        }
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
         }

@@ -10,7 +10,7 @@ const cors = require('cors');
 const app = express();
 
 mongoose
-  .connect("mongodb+srv://lalit:lalitt@cluster0.sr3i4sj.mongodb.net/adiray", {
+  .connect("mongodb+srv://chetan5993:chetan123@cluster0.alnz88d.mongodb.net/adiray", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
