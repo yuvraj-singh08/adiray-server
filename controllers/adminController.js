@@ -30,15 +30,15 @@ const adminLogin = async (req, res) => {
     try {
         const { username, password } = req.body;
         const user = await admin.findOne({ username });
-        console.log(user);
-        if (!user) return res.status(400).json({ message: "user does not exist. " });
+        console.log('user', user);
+        if (!user) return res.status(401).json({ message: "user does not exist. ", success: false });
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ message: "Invalid credentials. " });
+        if (!isMatch) return res.status(401).json({ message: "Wrong Password. ", success: false });
 
-        const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY);
+        const token = jwt.sign({ id: user._id, username, password }, process.env.SECRET_KEY);
         delete user.password;
-        res.status(200).json({ token, user });
+        res.status(200).json({ token, user, success: true });
     }
     catch (err) {
         res.status(500).json({ error: err.message });

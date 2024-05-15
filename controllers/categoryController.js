@@ -5,18 +5,19 @@ const createCategory = async (req, res) => {
         const { name, imageUrl } = req.body;
         const data = await Category.find({ name: name });
         if (data.length > 0) {
-            return res.status(400).json({ message: "category already exists. " });
+            return res.status(400).json({ message: "category already exists. ", success: false });
         }
         const newCategory = new Category({
             name,
             imageUrl,
-            subCategory: []
+            products: []
+            // subCategory: []
         });
 
         const savedCategory = await newCategory.save();
-        res.status(201).json(savedCategory);
+        res.status(201).json({ ...savedCategory, success: true });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: err.message, success: false });
     }
 }
 
@@ -45,7 +46,7 @@ const createSubCategory = async (req, res) => {
 
 const addProduct = async (req, res) => {
     try {
-        const { name, imageUrl, url, categoryId, subCategoryId } = req.body;
+        const { name, imageUrl, url, categoryId } = req.body;
 
         // Find the category by ID
         const category = await Category.findById(categoryId);
@@ -53,15 +54,6 @@ const addProduct = async (req, res) => {
         // If category not found, return error
         if (!category) {
             return res.status(404).json({ success: false, message: 'Category not found.' });
-        }
-
-        // Find the subcategory within the category by ID
-        const subCategory = category.subCategory.find(sub => sub._id == subCategoryId);
-
-        // If subcategory not found, return error
-        if (!subCategory) {
-            s
-            return res.status(404).json({ success: false, message: 'Subcategory not found in this category.' });
         }
 
         // Create a new product object
@@ -72,7 +64,7 @@ const addProduct = async (req, res) => {
         };
 
         // Push the new product into the subcategory's products array
-        subCategory.products.push(newProduct);
+        category.products.push(newProduct);
 
         // Save the updated category
         await category.save();
@@ -86,7 +78,7 @@ const addProduct = async (req, res) => {
 
 const getCategoryList = async (req, res) => {
     try {
-        const categories = await Category.find().select('_id name imageUrl');
+        const categories = await Category.find().select('_id name imageUrl').sort({ _id: -1 });
         const formattedCategories = categories.map(category => ({
             id: category._id,
             name: category.name,
@@ -115,17 +107,53 @@ const getSubCategoryList = async (req, res) => {
     }
 }
 
-const getProductList = async (req, res) => {
+const getCategoryData = async (req, res) => {
     try {
-        const { categoryId, subCategoryId } = req.params;
-        const category = await Category.findOne({ _id: categoryId }).select('subCategory');
-        const subCategory = category.subCategory.find(sub => sub._id == subCategoryId);
-        const products = subCategory.products;
-        res.status(200).json(products);
+        const { categoryId } = req.params;
+        const category = await Category.findOne({ _id: categoryId });
+        res.status(200).json(category);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 }
 
+const updateCategory = async (req, res) => {
+    try {
+        const { name, _id, imageUrl, products } = req.body;
+        const category = await Category.findById(_id);
+        if (!category) {
+            return res.status(404).json({ message: "Category not found.", success: false });
+        }
+        category.name = name;
+        category.imageUrl = imageUrl;
+        category.products = products;
+        const savedCategory = await category.save();
+        res.status(200).json({ ...savedCategory, success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message, success: false });
+    }
+}
 
-module.exports = { createCategory, createSubCategory, addProduct, getCategoryList, getSubCategoryList, getProductList };
+const updateProduct = async (req, res) => {
+    try {
+        const { name, url, categoryId, productId } = req.body;
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({ message: "Category not found.", success: false });
+        }
+        const product = category.products.find(product => product._id.toString() === productId);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found.", success: false });
+        }
+        product.name = name;
+        product.url = url;
+        const savedCategory = await category.save();
+        res.status(200).json({ ...savedCategory, success: true });
+    } catch (err) {
+        res.status(500).json({ message: err.message, success: false });
+    }
+}
+
+
+
+module.exports = { updateProduct, createCategory, createSubCategory, addProduct, getCategoryList, getSubCategoryList, getCategoryData, updateCategory };

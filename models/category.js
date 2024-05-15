@@ -6,27 +6,12 @@ const productSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    imageUrl: {
-        type: String,
-        required: true
-    },
     url: {
         type: String,
         required: true
     }
 })
 
-const subCategorySchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    products: {
-        type: [productSchema],
-        required: false,
-    }
-})
 
 const categorySchema = new mongoose.Schema({
     name: {
@@ -38,8 +23,8 @@ const categorySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    subCategory: {
-        type: [subCategorySchema],
+    products: {
+        type: [productSchema],
         required: false,
     }
 });
